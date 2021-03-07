@@ -1,17 +1,36 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom";
+import { Provider } from "react-redux";
+import { configureStore } from "@reduxjs/toolkit";
+import {
+  ChakraProvider,
+  ColorModeScript,
+  ColorModeProvider,
+} from "@chakra-ui/react";
+import { BrowserRouter as Router } from "react-router-dom";
+import { mode } from "@chakra-ui/theme-tools";
+import Fonts from "./components/Fonts";
+import App from "./components/App";
+import rootReducer from "./reducers";
+import { extendTheme } from "@chakra-ui/react";
+import "./index.css";
+import theme from "./theme";
+
+const store = configureStore({
+  reducer: rootReducer,
+});
+
+const rootElement = document.getElementById("root");
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+  <ChakraProvider theme={theme}>
+    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+    <Fonts />
+    <Provider store={store}>
+      <Router>
+        <App />
+      </Router>
+    </Provider>
+  </ChakraProvider>,
+  rootElement
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
