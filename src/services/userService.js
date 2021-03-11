@@ -1,4 +1,6 @@
 import axios from "axios";
+import jwt from 'jwt-decode'
+import { cloneElement } from "react";
 
 const BASE_URL = process.env.REACT_APP_SC_BASE_URL;
 
@@ -8,8 +10,9 @@ const login = async (username, password) => {
       username: username,
       password: password,
     });
-    console.log(response);
-    return response.data;
+    let data = response.data
+    const user = jwt(data.access_token);
+    return {'access_token': data.access_token, 'user_id': user.identity};
   } catch (error) {
     console.log(error);
   }
@@ -24,8 +27,6 @@ const getUsers = async () => {
         Authorization: `JWT ${token}`,
       },
     });
-    console.log(response);
-    console.log(response.data)
     return response.data;
   } catch (error) {
     console.log(error);

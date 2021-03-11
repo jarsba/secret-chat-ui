@@ -13,146 +13,92 @@ import {
   ListItem,
   List,
   Avatar,
+  Tooltip,
   useColorModeValue,
 } from "@chakra-ui/react";
-
+import { connect } from "react-redux";
 import { ChatIcon, EmailIcon } from "@chakra-ui/icons";
 
 import ChatMessage from "./ChatMessage";
+import ChatDate from "./ChatDate";
+
+import {
+  getMessagesFromRoom,
+  getMessagesFromUser,
+  postMessage,
+} from "../services/messageService";
+
+import { datesAreOnSameDay } from "../utils/dateUtils";
 
 function ChatRoom(props) {
   const [messages, setMessages] = useState([]);
-  const bottomRef = useRef(null);
-  const executeScroll = () => console.log("Scrolling") && bottomRef.current.scrollIntoView()    
+  const [messageValue, setMessageValue] = useState("");
+  const handleChange = (event) => {
+    setMessageValue(event.target.value);
+  };
 
-  useEffect(() => {
-    setMessages([
-      { id: 1, content: "Testing content", datetime: new Date(), user_id: 1 },
-      { id: 2, content: "Testing content2", datetime: new Date(), user_id: 2 },
-      { id: 3, content: "Testing content3", datetime: new Date(), user_id: 2 },
-      {
-        id: 4,
-        content:
-          "Testing long long long long long long long long long long long long long long long long long long long long long long long content4",
-        datetime: new Date(),
-        user_id: 1,
-      },
-      { id: 5, content: "Testing content5", datetime: new Date(), user_id: 1 },
-      { id: 6, content: "Testing content6", datetime: new Date(), user_id: 2 },
-      { id: 7, content: "Testing content7", datetime: new Date(), user_id: 1 },
-      { id: 8, content: "Testing content8", datetime: new Date(), user_id: 1 },
-      { id: 9, content: "Testing content9", datetime: new Date(), user_id: 2 },
-      {
-        id: 10,
-        content: "Testing content10",
-        datetime: new Date(),
-        user_id: 1,
-      },
-      {
-        id: 11,
-        content: "Testing content11",
-        datetime: new Date(),
-        user_id: 1,
-      },
-      {
-        id: 12,
-        content: "Testing content12",
-        datetime: new Date(),
-        user_id: 2,
-      },
-      {
-        id: 13,
-        content: "Testing content13",
-        datetime: new Date(),
-        user_id: 1,
-      },
+  const [top, setTop] = useState(null);
+  const topRef = useRef(null);
+  const bottomRef = useRef();
 
-      {
-        id: 14,
-        content: "Testing content14",
-        datetime: new Date(),
-        user_id: 1,
-      },
-      {
-        id: 15,
-        content: "Testing content15",
-        datetime: new Date(),
-        user_id: 2,
-      },
-      {
-        id: 16,
-        content: "Testing content16",
-        datetime: new Date(),
-        user_id: 1,
-      },
+  useEffect(async () => {
+    if (props.private) {
+      const response = await getMessagesFromUser(props.id);
+      let messages = response.data;
+      // Sort descending
+      messages = sortMessages(messages);
+      setMessages(messages);
+    } else {
+      const response = await getMessagesFromRoom(props.id);
+      let messages = response.data;
+      // Sort descending
+      messages = sortMessages(messages);
+      setMessages(messages);
+    }
 
-      {
-        id: 17,
-        content: "Testing content17",
-        datetime: new Date(),
-        user_id: 1,
-      },
-      {
-        id: 18,
-        content: "Testing content18",
-        datetime: new Date(),
-        user_id: 2,
-      },
-      {
-        id: 19,
-        content: "Testing content19",
-        datetime: new Date(),
-        user_id: 1,
-      },
-
-      {
-        id: 20,
-        content: "Testing content20",
-        datetime: new Date(),
-        user_id: 1,
-      },
-      {
-        id: 21,
-        content: "Testing content21",
-        datetime: new Date(),
-        user_id: 2,
-      },
-      {
-        id: 22,
-        content: "Testing content22",
-        datetime: new Date(),
-        user_id: 1,
-      },
-
-      {
-        id: 23,
-        content: "Testing content23",
-        datetime: new Date(),
-        user_id: 1,
-      },
-      {
-        id: 24,
-        content: "Testing content24",
-        datetime: new Date(),
-        user_id: 2,
-      },
-      {
-        id: 25,
-        content: "Testing content25",
-        datetime: new Date(),
-        user_id: 1,
-      },
-    ]);
-    setTimeout(executeScroll, 1000);
+    setTimeout(() => {
+      bottomRef.current.scrollIntoView();
+    }, 1);
   }, []);
 
-  console.log(props);
+  const sortMessages = (messagesToSort) => {
+    let sortedMessages = messagesToSort.sort((a, b) =>
+      new Date(a.updated_at) > new Date(b.updated_at) ? 1 : -1
+    );
+    return sortedMessages;
+  };
 
-  const sendMessage = () => {
-    alert("Enter hit! Send!");
+  const messagesShareDate = (message1, message2) => {
+    let date1 = new Date(message1.updated_at);
+    let date2 = new Date(message2.updated_at);
+    return datesAreOnSameDay(date1, date2);
+  };
+
+  const sendMessage = async () => {
+    if (messageValue != "") {
+      let newMessage;
+      if (props.private) {
+        newMessage = {
+          content: messageValue,
+          user_id: props.user.user_id,
+          recipient_id: props.id,
+        };
+      } else {
+        newMessage = {
+          content: messageValue,
+          user_id: props.user.user_id,
+          room_id: props.id,
+        };
+      }
+      const response = await postMessage(newMessage);
+      let updatedMessages = sortMessages([...messages, response.data]);
+      setMessages(updatedMessages);
+      setMessageValue("");
+    }
   };
 
   const bgColor = useColorModeValue("white", "gray.800");
+  const toolTipOpen = messages.length == 0;
 
   return (
     <Flex
@@ -215,23 +161,85 @@ function ChatRoom(props) {
           },
         }}
       >
-        {messages.map((message) => {
-          return (
-            <ListItem
-              width="100%"
-              key={message.id}
-              justifyContent={message.user_id === 1 ? "flex-end" : "flex-start"}
-            >
-              <ChatMessage
-                content={message.content}
+        <ListItem key="top">
+          <div ref={topRef}></div>
+        </ListItem>
+        {messages.map((message, index, array) => {
+          if (index == 0) {
+            return (
+              <>
+                <ListItem width="100%" key={index + 1000}>
+                  <ChatDate date={message.updated_at} />
+                </ListItem>
+                <ListItem
+                  width="100%"
+                  key={message.id}
+                  justifyContent={
+                    message.user_id === 1 ? "flex-end" : "flex-start"
+                  }
+                >
+                  <ChatMessage
+                    content={message.content}
+                    time={message.updated_at}
+                    justifyContent={
+                      message.user_id === props.user.user_id
+                        ? "flex-end"
+                        : "flex-start"
+                    }
+                  />
+                </ListItem>
+              </>
+            );
+          } else if (!messagesShareDate(message, array[index - 1])) {
+            return (
+              <>
+                <ListItem width="100%" key={index + 1000}>
+                  <ChatDate date={array[index - 1].updated_at} />
+                </ListItem>
+                <ListItem
+                  width="100%"
+                  key={message.id}
+                  justifyContent={
+                    message.user_id === 1 ? "flex-end" : "flex-start"
+                  }
+                >
+                  <ChatMessage
+                    content={message.content}
+                    time={message.updated_at}
+                    justifyContent={
+                      message.user_id === props.user.user_id
+                        ? "flex-end"
+                        : "flex-start"
+                    }
+                  />
+                </ListItem>
+              </>
+            );
+          } else {
+            return (
+              <ListItem
+                width="100%"
+                key={message.id}
                 justifyContent={
                   message.user_id === 1 ? "flex-end" : "flex-start"
                 }
-              />
-            </ListItem>
-          );
+              >
+                <ChatMessage
+                  content={message.content}
+                  time={message.updated_at}
+                  justifyContent={
+                    message.user_id === props.user.user_id
+                      ? "flex-end"
+                      : "flex-start"
+                  }
+                />
+              </ListItem>
+            );
+          }
         })}
-        <ListItem ref={bottomRef}>Bottom</ListItem>
+        <ListItem key="bottom">
+          <div ref={bottomRef}></div>
+        </ListItem>
       </List>
       <Box maxW="100%" height="40px">
         <Stack spacing={4}>
@@ -244,6 +252,8 @@ function ChatRoom(props) {
               size="md"
               placeholder="Message"
               focusBorderColor="teal.500"
+              value={messageValue}
+              onChange={handleChange}
               onKeyPress={(event) => event.key === "Enter" && sendMessage()}
             />
             <InputRightElement>
@@ -264,4 +274,10 @@ function ChatRoom(props) {
   );
 }
 
-export default ChatRoom;
+const mapStateToProps = (state) => {
+  return {
+    user: state.user,
+  };
+};
+
+export default connect(mapStateToProps, null)(ChatRoom);

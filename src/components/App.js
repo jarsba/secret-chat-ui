@@ -7,6 +7,7 @@ import {
   Redirect,
   useRouteMatch,
 } from "react-router-dom";
+import jwt from 'jwt-decode'
 import { connect, useDispatch } from "react-redux";
 import { loginAction } from "../reducers/userReducer";
 import Login from "./Login";
@@ -21,7 +22,9 @@ function App(props) {
   const checkAuthentication = () => {
     if (props.user.token || localStorage.getItem("token")) {
       if (!props.user.token) {
-        dispatch(loginAction({ token: localStorage.getItem("token") }));
+        const token = localStorage.getItem("token")
+        const user_id = jwt(token).identity
+        dispatch(loginAction({ token: token, user_id: user_id}));
       } else if (!localStorage.getItem("token")) {
         localStorage.setItem("token", props.user.token);
       }

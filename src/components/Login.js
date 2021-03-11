@@ -34,7 +34,7 @@ function Login(props) {
     console.log(`Email: ${email} & Password: ${password}`);
     let response = await login(email, password);
     localStorage.setItem('token', response.access_token)
-    dispatch(loginAction({'token': response.access_token}))
+    dispatch(loginAction({'token': response.access_token, 'user_id': response.user_id}))
     history.push("/");
   };
 
