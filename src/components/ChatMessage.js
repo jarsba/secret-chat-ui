@@ -8,21 +8,24 @@ import {
   Menu,
   MenuList,
   MenuItem,
-  MenuButton
+  MenuButton,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { DragHandleIcon } from "@chakra-ui/icons";
 
 function ChatMessage(props) {
-
-  let dateObj = new Date(props.time)
-  let formattedDate = `${dateObj.getHours()}.${dateObj.getMinutes()}`
+  let dateObj = new Date(props.time);
+  let formattedDate = `${("0" + dateObj.getHours()).slice(-2)}.${(
+    "0" + dateObj.getMinutes()
+  ).slice(-2)}`;
+  const chatMessageBg = useColorModeValue("white", "teal.800");
 
   return (
-    <Flex justifyContent={props.justifyContent} width="100%" >
+    <Flex justifyContent={props.justifyContent} width="100%">
       <Box
         display="flex"
         boxShadow="md"
-        bgColor="white"
+        bgColor={chatMessageBg}
         m="3"
         p="3"
         borderRadius="20px"
@@ -30,13 +33,12 @@ function ChatMessage(props) {
         <Text mr={3} p={1}>
           {props.content}
         </Text>
-        <Spacer />
         <Text fontSize="xs" alignSelf="flex-end">
           {formattedDate}
         </Text>
       </Box>
 
-      <Menu>
+      <Menu >
         <MenuButton
           as={IconButton}
           alignSelf="center"
@@ -54,8 +56,10 @@ function ChatMessage(props) {
         >
           {" "}
         </MenuButton>
-        <MenuList minW={"4rem"}>
-          <MenuItem>Delete</MenuItem>
+        <MenuList minW={"4rem"} zIndex={20}>
+          <MenuItem onClick={() => props.deleteMessage(props.id)}>
+            Delete
+          </MenuItem>
         </MenuList>
       </Menu>
     </Flex>

@@ -29,8 +29,8 @@ function Home(props) {
     let roomsResponse = await getRooms();
     let roomList = roomsResponse.data
 
-    await setUsers(userList);
-    await setRooms(roomList);
+    setUsers(userList);
+    setRooms(roomList);
   }, []);
 
   const bgColor = useColorModeValue("white", "gray.800");

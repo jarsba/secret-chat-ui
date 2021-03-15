@@ -47,4 +47,20 @@ const postMessage = async (message) => {
   }
 };
 
-export { getMessagesFromRoom, getMessagesFromUser, postMessage };
+const removeMessage = async (id) => {
+  let token = localStorage.getItem("token");
+  console.log('Remove message with id ', id);
+
+  try {
+    let response = await axios.delete(`${BASE_URL}/message/${id}`, {
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export { getMessagesFromRoom, getMessagesFromUser, postMessage, removeMessage };

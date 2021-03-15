@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 import jwt from 'jwt-decode'
 import { connect, useDispatch } from "react-redux";
-import { loginAction } from "../reducers/userReducer";
+import { loginAction, validateToken } from "../reducers/userReducer";
 import Login from "./Login";
 import ChatRoom from "./ChatRoom";
 import Home from "./Home";
@@ -20,14 +20,16 @@ function App(props) {
   const dispatch = useDispatch();
 
   const checkAuthentication = () => {
-    if (props.user.token || localStorage.getItem("token")) {
-      if (!props.user.token) {
-        const token = localStorage.getItem("token")
-        const user_id = jwt(token).identity
-        dispatch(loginAction({ token: token, user_id: user_id}));
-      } else if (!localStorage.getItem("token")) {
-        localStorage.setItem("token", props.user.token);
-      }
+    let reduxToken = props.user.token
+    let token = localStorage.getItem("token")
+    if (token && reduxToken) {
+      return true;
+    } else if (!token && reduxToken) {
+      localStorage.setItem("token", reduxToken);
+      return true;
+    } else if (!reduxToken && token) {
+      const user_id = jwt(token).identity
+      dispatch(loginAction({ token: token, user_id: user_id}));
       return true;
     }
     return false;

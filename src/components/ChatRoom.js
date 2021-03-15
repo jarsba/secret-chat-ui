@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import socketIOClient from "socket.io-client";
 import {
   Flex,
   Box,
@@ -26,9 +27,20 @@ import {
   getMessagesFromRoom,
   getMessagesFromUser,
   postMessage,
+  removeMessage,
 } from "../services/messageService";
 
+import {
+  getRoom
+} from "../services/chatRoomService";
+
+import {
+  getUser
+} from "../services/userService";
+
 import { datesAreOnSameDay } from "../utils/dateUtils";
+
+const SOCKETIO_URL = "http://0.0.0.0:5000";
 
 function ChatRoom(props) {
   const [messages, setMessages] = useState([]);
@@ -43,12 +55,17 @@ function ChatRoom(props) {
 
   useEffect(async () => {
     if (props.private) {
+      const user = await getUser(props.id)
+      console.log(user);
       const response = await getMessagesFromUser(props.id);
       let messages = response.data;
       // Sort descending
       messages = sortMessages(messages);
       setMessages(messages);
     } else {
+      const room = await getRoom(props.id)
+      console.log(room);
+
       const response = await getMessagesFromRoom(props.id);
       let messages = response.data;
       // Sort descending
@@ -56,9 +73,16 @@ function ChatRoom(props) {
       setMessages(messages);
     }
 
+    const socket = socketIOClient(SOCKETIO_URL);
+    socket.on("connect", (data) => {
+      socket.send("KUUMA KATARIINA BIKINEISSÄ!");
+    });
+
     setTimeout(() => {
       bottomRef.current.scrollIntoView();
     }, 1);
+
+    return () => socket.disconnect();
   }, []);
 
   const sortMessages = (messagesToSort) => {
@@ -71,7 +95,8 @@ function ChatRoom(props) {
   const messagesShareDate = (message1, message2) => {
     let date1 = new Date(message1.updated_at);
     let date2 = new Date(message2.updated_at);
-    return datesAreOnSameDay(date1, date2);
+    let shareDate = datesAreOnSameDay(date1, date2);
+    return shareDate;
   };
 
   const sendMessage = async () => {
@@ -94,11 +119,24 @@ function ChatRoom(props) {
       let updatedMessages = sortMessages([...messages, response.data]);
       setMessages(updatedMessages);
       setMessageValue("");
+
+      bottomRef.current.scrollIntoView();
     }
   };
 
+  const deleteMessage = async (id) => {
+    console.log("Delete message");
+    console.log(id);
+
+    const response = await removeMessage(id)
+    console.log(response);
+
+    let updatedMessages = messages.filter(n => n.id !== id)
+    setMessages(updatedMessages)
+  };
+
   const bgColor = useColorModeValue("white", "gray.800");
-  const toolTipOpen = messages.length == 0;
+  const chatHeaderColor = useColorModeValue("teal", "teal.800");
 
   return (
     <Flex
@@ -117,7 +155,7 @@ function ChatRoom(props) {
         justifyContent="center"
         m={0}
         p={0}
-        bgColor="teal"
+        bgColor={chatHeaderColor}
         maxW="100%"
         height="70px"
         textAlign="center"
@@ -136,7 +174,7 @@ function ChatRoom(props) {
         maxW="100%"
         height="75vh"
         overflowY="scroll"
-        bgColor="gray.50"
+        bgColor={bgColor}
         css={{
           "::-webkit-scrollbar": {
             width: "5px",
@@ -179,8 +217,10 @@ function ChatRoom(props) {
                   }
                 >
                   <ChatMessage
+                    id={message.id}
                     content={message.content}
                     time={message.updated_at}
+                    deleteMessage={deleteMessage}
                     justifyContent={
                       message.user_id === props.user.user_id
                         ? "flex-end"
@@ -190,11 +230,11 @@ function ChatRoom(props) {
                 </ListItem>
               </>
             );
-          } else if (!messagesShareDate(message, array[index - 1])) {
+          } else if (messagesShareDate(message, array[index - 1]) === false) {
             return (
               <>
                 <ListItem width="100%" key={index + 1000}>
-                  <ChatDate date={array[index - 1].updated_at} />
+                  <ChatDate date={message.updated_at} />
                 </ListItem>
                 <ListItem
                   width="100%"
@@ -204,8 +244,10 @@ function ChatRoom(props) {
                   }
                 >
                   <ChatMessage
+                    id={message.id}
                     content={message.content}
                     time={message.updated_at}
+                    deleteMessage={deleteMessage}
                     justifyContent={
                       message.user_id === props.user.user_id
                         ? "flex-end"
@@ -225,8 +267,10 @@ function ChatRoom(props) {
                 }
               >
                 <ChatMessage
+                  id={message.id}
                   content={message.content}
                   time={message.updated_at}
+                  deleteMessage={deleteMessage}
                   justifyContent={
                     message.user_id === props.user.user_id
                       ? "flex-end"

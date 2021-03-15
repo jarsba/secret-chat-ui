@@ -33,4 +33,20 @@ const getUsers = async () => {
   }
 };
 
-export { login, getUsers };
+const getUser = async (id) => {
+  let token = localStorage.getItem("token");
+
+  try {
+    let response = await axios.get(`${BASE_URL}/user/${id}`, {
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+export { login, getUsers, getUser };
