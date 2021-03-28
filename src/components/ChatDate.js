@@ -28,7 +28,7 @@ function ChatDate(props) {
   const chatDateBg = useColorModeValue("yellow.200", "yellow.800");
 
   return (
-    <Flex justifyContent={"center"} width="100%" key={uniqueId()}>
+    <Flex justifyContent={"center"} width="100%">
       <Box boxShadow="md" bgColor={chatDateBg} m="1" p="1" borderRadius="20px">
         <Text fontSize="xs" p={1}>
           {formatteDate}

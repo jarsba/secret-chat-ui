@@ -23,7 +23,7 @@ function ChatMessage(props) {
   const chatMessageBg = useColorModeValue("white", "teal.800");
 
   return (
-    <Flex justifyContent={props.justifyContent} width="100%" key={uniqueId()}>
+    <Flex justifyContent={props.justifyContent} width="100%">
       <Box
         display="flex"
         boxShadow="md"
@@ -59,7 +59,7 @@ function ChatMessage(props) {
           {" "}
         </MenuButton>
         <MenuList minW={"4rem"} zIndex={20}>
-          <MenuItem key={uniqueId()} onClick={() => props.deleteMessage(props.id)}>
+          <MenuItem onClick={() => props.deleteMessage(props.id)}>
             Delete
           </MenuItem>
         </MenuList>

@@ -157,7 +157,6 @@ function ChatRoom(props) {
       flexDirection="column"
     >
       <Box
-        key={uniqueId()}
         display="flex"
         borderTopRadius="md"
         alignItems="center"
@@ -180,7 +179,6 @@ function ChatRoom(props) {
         </Heading>
       </Box>
       <List
-        key={uniqueId()}
         maxW="100%"
         height="75vh"
         overflowY="scroll"
@@ -209,25 +207,24 @@ function ChatRoom(props) {
           },
         }}
       >
-        <ListItem key={uniqueId()}>
-          <div key={uniqueId()} ref={topRef}></div>
+        <ListItem key={"top"}>
+          <div ref={topRef}></div>
         </ListItem>
         {messages.map((message, index, array) => {
           if (index == 0) {
             return (
               <>
-                <ListItem width="100%" key={uniqueId()}>
-                  <ChatDate key={uniqueId()} date={message.updated_at} />
+                <ListItem width="100%" key={index-1}>
+                  <ChatDate date={message.updated_at} />
                 </ListItem>
                 <ListItem
                   width="100%"
-                  key={uniqueId()}
+                  key={index}
                   justifyContent={
                     message.user_id === 1 ? "flex-end" : "flex-start"
                   }
                 >
                   <ChatMessage
-                    key={uniqueId()}
                     id={message.id}
                     content={message.content}
                     time={message.updated_at}
@@ -244,18 +241,17 @@ function ChatRoom(props) {
           } else if (messagesShareDate(message, array[index - 1]) === false) {
             return (
               <>
-                <ListItem width="100%" key={uniqueId()}>
-                  <ChatDate key={uniqueId()} date={message.updated_at} />
+                <ListItem width="100%" key={index}>
+                  <ChatDate date={message.updated_at} />
                 </ListItem>
                 <ListItem
                   width="100%"
-                  key={uniqueId()}
+                  key={index}
                   justifyContent={
                     message.user_id === 1 ? "flex-end" : "flex-start"
                   }
                 >
                   <ChatMessage
-                    key={uniqueId()}
                     id={message.id}
                     content={message.content}
                     time={message.updated_at}
@@ -273,13 +269,12 @@ function ChatRoom(props) {
             return (
               <ListItem
                 width="100%"
-                key={uniqueId()}
+                key={index}
                 justifyContent={
                   message.user_id === 1 ? "flex-end" : "flex-start"
                 }
               >
                 <ChatMessage
-                  key={uniqueId()}
                   id={message.id}
                   content={message.content}
                   time={message.updated_at}
@@ -294,7 +289,7 @@ function ChatRoom(props) {
             );
           }
         })}
-        <ListItem key={uniqueId()}>
+        <ListItem key={"bottom"}>
           <div ref={bottomRef}></div>
         </ListItem>
       </List>
