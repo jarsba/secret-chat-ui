@@ -1,16 +1,9 @@
-import axios from "axios";
+import api from '../utils/axios'
 
-const BASE_URL = process.env.REACT_APP_SC_BASE_URL;
 
 const getMessagesFromRoom = async (id) => {
-  let token = localStorage.getItem("token");
-
   try {
-    let response = await axios.get(`${BASE_URL}/message/chatroom/${id}`, {
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    });
+    let response = await api.get(`/message/chatroom/${id}`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -18,14 +11,8 @@ const getMessagesFromRoom = async (id) => {
 };
 
 const getMessagesFromUser = async (id) => {
-  let token = localStorage.getItem("token");
-
   try {
-    let response = await axios.get(`${BASE_URL}/message/user/${id}`, {
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    });
+    let response = await api.get(`/message/user/${id}`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -33,14 +20,8 @@ const getMessagesFromUser = async (id) => {
 };
 
 const postMessage = async (message) => {
-  let token = localStorage.getItem("token");
-
   try {
-    let response = await axios.post(`${BASE_URL}/message`, message, {
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    });
+    let response = await api.post(`/message`, message);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -48,15 +29,9 @@ const postMessage = async (message) => {
 };
 
 const removeMessage = async (id) => {
-  let token = localStorage.getItem("token");
   console.log('Remove message with id ', id);
-
   try {
-    let response = await axios.delete(`${BASE_URL}/message/${id}`, {
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    });
+    let response = await api.delete(`/message/${id}`);
     return response.data;
   } catch (error) {
     console.log(error);

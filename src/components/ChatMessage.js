@@ -13,6 +13,8 @@ import {
 } from "@chakra-ui/react";
 import { DragHandleIcon } from "@chakra-ui/icons";
 
+import { uniqueId } from "../utils/random";
+
 function ChatMessage(props) {
   let dateObj = new Date(props.time);
   let formattedDate = `${("0" + dateObj.getHours()).slice(-2)}.${(
@@ -21,7 +23,7 @@ function ChatMessage(props) {
   const chatMessageBg = useColorModeValue("white", "teal.800");
 
   return (
-    <Flex justifyContent={props.justifyContent} width="100%">
+    <Flex justifyContent={props.justifyContent} width="100%" key={uniqueId()}>
       <Box
         display="flex"
         boxShadow="md"
@@ -57,7 +59,7 @@ function ChatMessage(props) {
           {" "}
         </MenuButton>
         <MenuList minW={"4rem"} zIndex={20}>
-          <MenuItem onClick={() => props.deleteMessage(props.id)}>
+          <MenuItem key={uniqueId()} onClick={() => props.deleteMessage(props.id)}>
             Delete
           </MenuItem>
         </MenuList>

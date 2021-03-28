@@ -30,17 +30,14 @@ import {
   removeMessage,
 } from "../services/messageService";
 
-import {
-  getRoom
-} from "../services/chatRoomService";
+import { getRoom } from "../services/chatRoomService";
 
-import {
-  getUser
-} from "../services/userService";
+import { getUser } from "../services/userService";
 
+import { uniqueId } from "../utils/random";
 import { datesAreOnSameDay } from "../utils/dateUtils";
 
-const SOCKETIO_URL = "http://0.0.0.0:5000";
+const SOCKETIO_URL = "http://0.0.0.0:5000/";
 
 function ChatRoom(props) {
   const [messages, setMessages] = useState([]);
@@ -55,7 +52,7 @@ function ChatRoom(props) {
 
   useEffect(async () => {
     if (props.private) {
-      const user = await getUser(props.id)
+      const user = await getUser(props.id);
       console.log(user);
       const response = await getMessagesFromUser(props.id);
       let messages = response.data;
@@ -63,7 +60,7 @@ function ChatRoom(props) {
       messages = sortMessages(messages);
       setMessages(messages);
     } else {
-      const room = await getRoom(props.id)
+      const room = await getRoom(props.id);
       console.log(room);
 
       const response = await getMessagesFromRoom(props.id);
@@ -73,9 +70,20 @@ function ChatRoom(props) {
       setMessages(messages);
     }
 
+
     const socket = socketIOClient(SOCKETIO_URL);
     socket.on("connect", (data) => {
-      socket.send("KUUMA KATARIINA BIKINEISSÄ!");
+      console.log('SOCKET CONNECTION');
+      console.log(data);
+      const ids = [props.user.user_id, props.id].sort().join("")
+      console.log(ids)
+      const roomName = props.private ? `chat-${ids}` : `room-${props.id}`
+      console.log(roomName);
+      socket.send("join", {"room": roomName})
+    });
+
+    socket.on("message", (data) => {
+      console.log('RECEIVED DATA', data);
     });
 
     setTimeout(() => {
@@ -128,11 +136,11 @@ function ChatRoom(props) {
     console.log("Delete message");
     console.log(id);
 
-    const response = await removeMessage(id)
+    const response = await removeMessage(id);
     console.log(response);
 
-    let updatedMessages = messages.filter(n => n.id !== id)
-    setMessages(updatedMessages)
+    let updatedMessages = messages.filter((n) => n.id !== id);
+    setMessages(updatedMessages);
   };
 
   const bgColor = useColorModeValue("white", "gray.800");
@@ -149,6 +157,7 @@ function ChatRoom(props) {
       flexDirection="column"
     >
       <Box
+        key={uniqueId()}
         display="flex"
         borderTopRadius="md"
         alignItems="center"
@@ -171,6 +180,7 @@ function ChatRoom(props) {
         </Heading>
       </Box>
       <List
+        key={uniqueId()}
         maxW="100%"
         height="75vh"
         overflowY="scroll"
@@ -199,24 +209,25 @@ function ChatRoom(props) {
           },
         }}
       >
-        <ListItem key="top">
-          <div ref={topRef}></div>
+        <ListItem key={uniqueId()}>
+          <div key={uniqueId()} ref={topRef}></div>
         </ListItem>
         {messages.map((message, index, array) => {
           if (index == 0) {
             return (
               <>
-                <ListItem width="100%" key={index + 1000}>
-                  <ChatDate date={message.updated_at} />
+                <ListItem width="100%" key={uniqueId()}>
+                  <ChatDate key={uniqueId()} date={message.updated_at} />
                 </ListItem>
                 <ListItem
                   width="100%"
-                  key={message.id}
+                  key={uniqueId()}
                   justifyContent={
                     message.user_id === 1 ? "flex-end" : "flex-start"
                   }
                 >
                   <ChatMessage
+                    key={uniqueId()}
                     id={message.id}
                     content={message.content}
                     time={message.updated_at}
@@ -233,17 +244,18 @@ function ChatRoom(props) {
           } else if (messagesShareDate(message, array[index - 1]) === false) {
             return (
               <>
-                <ListItem width="100%" key={index + 1000}>
-                  <ChatDate date={message.updated_at} />
+                <ListItem width="100%" key={uniqueId()}>
+                  <ChatDate key={uniqueId()} date={message.updated_at} />
                 </ListItem>
                 <ListItem
                   width="100%"
-                  key={message.id}
+                  key={uniqueId()}
                   justifyContent={
                     message.user_id === 1 ? "flex-end" : "flex-start"
                   }
                 >
                   <ChatMessage
+                    key={uniqueId()}
                     id={message.id}
                     content={message.content}
                     time={message.updated_at}
@@ -261,12 +273,13 @@ function ChatRoom(props) {
             return (
               <ListItem
                 width="100%"
-                key={message.id}
+                key={uniqueId()}
                 justifyContent={
                   message.user_id === 1 ? "flex-end" : "flex-start"
                 }
               >
                 <ChatMessage
+                  key={uniqueId()}
                   id={message.id}
                   content={message.content}
                   time={message.updated_at}
@@ -281,7 +294,7 @@ function ChatRoom(props) {
             );
           }
         })}
-        <ListItem key="bottom">
+        <ListItem key={uniqueId()}>
           <div ref={bottomRef}></div>
         </ListItem>
       </List>

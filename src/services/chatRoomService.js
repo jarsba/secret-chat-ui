@@ -1,18 +1,8 @@
-import axios from "axios";
-
-const BASE_URL = process.env.REACT_APP_SC_BASE_URL;
+import api from '../utils/axios'
 
 const getRooms = async () => {
-  let token = localStorage.getItem("token");
-
   try {
-    let response = await axios.get(`${BASE_URL}/chatroom`, {
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    });
-    console.log(response);
-    console.log(response.data)
+    let response = await api.get(`/chatroom`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -20,16 +10,9 @@ const getRooms = async () => {
 };
 
 const getRoom = async (id) => {
-  let token = localStorage.getItem("token");
 
   try {
-    let response = await axios.get(`${BASE_URL}/chatroom/${id}`, {
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    });
-    console.log(response);
-    console.log(response.data)
+    let response = await api.get(`/chatroom/${id}`);
     return response.data;
   } catch (error) {
     console.log(error);

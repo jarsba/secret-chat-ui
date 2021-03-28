@@ -1,12 +1,10 @@
 import axios from "axios";
 import jwt from 'jwt-decode'
-import { cloneElement } from "react";
-
-const BASE_URL = process.env.REACT_APP_SC_BASE_URL;
+import api from '../utils/axios'
 
 const login = async (username, password) => {
   try {
-    let response = await axios.post(`${BASE_URL}/login`, {
+    let response = await api.post(`/login`, {
       username: username,
       password: password,
     });
@@ -19,14 +17,9 @@ const login = async (username, password) => {
 };
 
 const getUsers = async () => {
-  let token = localStorage.getItem("token");
 
   try {
-    let response = await axios.get(`${BASE_URL}/user`, {
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    });
+    let response = await api.get(`/user`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -34,16 +27,12 @@ const getUsers = async () => {
 };
 
 const getUser = async (id) => {
-  let token = localStorage.getItem("token");
 
   try {
-    let response = await axios.get(`${BASE_URL}/user/${id}`, {
-      headers: {
-        Authorization: `JWT ${token}`,
-      },
-    });
+    let response = await api.get(`/user/${id}`);
     return response.data;
   } catch (error) {
+    console.log('Failure');
     console.log(error);
   }
 };

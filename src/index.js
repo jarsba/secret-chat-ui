@@ -8,6 +8,7 @@ import {
   ColorModeProvider,
 } from "@chakra-ui/react";
 import { BrowserRouter as Router } from "react-router-dom";
+import { createBrowserHistory } from "history";
 import { mode } from "@chakra-ui/theme-tools";
 import Fonts from "./components/Fonts";
 import App from "./components/App";
@@ -21,6 +22,8 @@ const store = configureStore({
 });
 
 const rootElement = document.getElementById("root");
+
+export const history = createBrowserHistory();
 
 ReactDOM.render(
   <ChakraProvider theme={theme}>

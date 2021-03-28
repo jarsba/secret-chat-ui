@@ -10,6 +10,8 @@ import {
 } from "@chakra-ui/react";
 import { datesAreOnSameDay, datesAreConsecutive } from "../utils/dateUtils";
 
+import { uniqueId } from "../utils/random";
+
 function ChatDate(props) {
   let today = new Date();
   let dateProps = new Date(props.date)
@@ -26,7 +28,7 @@ function ChatDate(props) {
   const chatDateBg = useColorModeValue("yellow.200", "yellow.800");
 
   return (
-    <Flex justifyContent={"center"} width="100%">
+    <Flex justifyContent={"center"} width="100%" key={uniqueId()}>
       <Box boxShadow="md" bgColor={chatDateBg} m="1" p="1" borderRadius="20px">
         <Text fontSize="xs" p={1}>
           {formatteDate}
